@@ -20,7 +20,7 @@ class WelcomeScreen extends StatelessWidget {
               width: double.infinity,
               child: Image.asset('images/logo.png')),
           Text(
-            'MessageMe',
+            'MessageMe pls, thank you all!',
             style: TextStyle(
                 fontSize: 40,
                 fontWeight: FontWeight.w900,
@@ -31,7 +31,7 @@ class WelcomeScreen extends StatelessWidget {
             onPressed: () {
               Navigator.pushNamed(context, SigninScreen.screenRoute);
             },
-            title: 'Sign innnnn',
+            title: 'Sign in',
           ),
           MyButton(
               color: Colors.blue[800]!,
