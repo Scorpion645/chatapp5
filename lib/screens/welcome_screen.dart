@@ -20,7 +20,7 @@ class WelcomeScreen extends StatelessWidget {
               width: double.infinity,
               child: Image.asset('images/logo.png')),
           Text(
-            'MessageMe pls',
+            'MessageMe pls, thank you!',
             style: TextStyle(
                 fontSize: 40,
                 fontWeight: FontWeight.w900,
