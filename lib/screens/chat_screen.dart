@@ -1,5 +1,6 @@
 // ignore_for_file: unused_import
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -12,6 +13,8 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  String? messageText;
+  final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
   late User signedInUser;
 
@@ -76,7 +79,9 @@ class _ChatScreenState extends State<ChatScreen> {
               children: [
                 Expanded(
                   child: TextField(
-                    onChanged: (value) {},
+                    onChanged: (value) {
+                      messageText = value;
+                    },
                     decoration: InputDecoration(
                         contentPadding:
                             EdgeInsets.symmetric(vertical: 10, horizontal: 20),
@@ -85,7 +90,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ),
                 TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      _firestore.collection('messages').add({'text':messageText, 'sender':signedInUser.email});
+                    },
                     child: Text('Send',
                         style: TextStyle(
                             color: Colors.blue[800],
