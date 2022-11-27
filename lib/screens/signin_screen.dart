@@ -1,10 +1,24 @@
-import 'package:flutter/material.dart';
+// ignore_for_file: unused_import, prefer_const_declarations
 
+import 'package:chatapp5/screens/chat_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/my_button.dart';
 
-class SigninScreen extends StatelessWidget {
+class SigninScreen extends StatefulWidget {
   static final String screenRoute = 'signin_screen';
   const SigninScreen({super.key});
+
+  @override
+  State<SigninScreen> createState() => _SigninScreenState();
+}
+
+class _SigninScreenState extends State<SigninScreen> {
+  final _auth = FirebaseAuth.instance;
+
+  late String email;
+  late String password;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +38,9 @@ class SigninScreen extends StatelessWidget {
           TextField(
             keyboardType: TextInputType.emailAddress,
             textAlign: TextAlign.center,
-            onChanged: (value) {},
+            onChanged: (value) {
+              email = value;
+            },
             decoration: InputDecoration(
               hintText: 'Enter your Email',
               contentPadding:
@@ -45,7 +61,9 @@ class SigninScreen extends StatelessWidget {
           TextField(
             obscureText: true,
             textAlign: TextAlign.center,
-            onChanged: (value) {},
+            onChanged: (value) {
+              password = value;
+            },
             decoration: InputDecoration(
               hintText: 'Enter your Password',
               contentPadding:
@@ -64,8 +82,19 @@ class SigninScreen extends StatelessWidget {
             height: 10,
           ),
           MyButton(
-              color: Colors.yellow[900]!, title: 'Sign in', onPressed: () {})
-        
+              color: Colors.yellow[900]!,
+              title: 'Sign in',
+              onPressed: () async {
+                try {
+                  final user = await _auth.signInWithEmailAndPassword(
+                      email: email, password: password);
+                  if (user != null) {
+                    Navigator.pushNamed(context, ChatScreen.screenRoute);
+                  }
+                } catch (e) {
+                  print(e);
+                }
+              })
         ],
       ),
     );
