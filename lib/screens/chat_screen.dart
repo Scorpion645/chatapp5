@@ -49,13 +49,13 @@ class _ChatScreenState extends State<ChatScreen> {
   //   }
   // }
 
-  void messagesStreams() async {
-    await for (var snapshot in _firestore.collection('messages').snapshots()) {
-      for (var message in snapshot.docs) {
-        print(message.data());
-      }
-    }
-  }
+  // void messagesStreams() async {
+  //   await for (var snapshot in _firestore.collection('messages').snapshots()) {
+  //     for (var message in snapshot.docs) {
+  //       print(message.data());
+  //     }
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -77,11 +77,11 @@ class _ChatScreenState extends State<ChatScreen> {
         actions: [
           IconButton(
               onPressed: () {
-                // _auth.signOut();
-                // Navigator.pop(context);
-                messagesStreams();
+                _auth.signOut();
+                Navigator.pop(context);
+                // messagesStreams();
               },
-              icon: Icon(Icons.download))
+              icon: Icon(Icons.close))
         ],
       ),
       body: SafeArea(
@@ -113,8 +113,11 @@ class _ChatScreenState extends State<ChatScreen> {
                 TextButton(
                     onPressed: () {
                       messageTextController.clear();
-                      _firestore.collection('messages').add(
-                          {'text': messageText, 'sender': signedInUser.email});
+                      _firestore.collection('messages').add({
+                        'text': messageText,
+                        'sender': signedInUser.email,
+                        'time': FieldValue.serverTimestamp()
+                      });
                     },
                     child: Text('Send',
                         style: TextStyle(
@@ -131,7 +134,11 @@ class _ChatScreenState extends State<ChatScreen> {
 }
 
 class MessageLine extends StatelessWidget {
-  const MessageLine({super.key, required this.sender, required this.text, required this.isMe});
+  const MessageLine(
+      {super.key,
+      required this.sender,
+      required this.text,
+      required this.isMe});
   final bool isMe;
   final String sender;
   final String text;
@@ -141,7 +148,8 @@ class MessageLine extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(10),
       child: Column(
-        crossAxisAlignment: isMe? CrossAxisAlignment.end:CrossAxisAlignment.start,
+        crossAxisAlignment:
+            isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
           Text(
             '$sender',
@@ -150,16 +158,17 @@ class MessageLine extends StatelessWidget {
           Material(
             elevation: 5,
             borderRadius: BorderRadius.only(
-                topLeft: isMe? Radius.circular(30):Radius.circular(0),
-                topRight: isMe? Radius.circular(0):Radius.circular(30),
+                topLeft: isMe ? Radius.circular(30) : Radius.circular(0),
+                topRight: isMe ? Radius.circular(0) : Radius.circular(30),
                 bottomLeft: Radius.circular(30),
                 bottomRight: Radius.circular(30)),
-            color: isMe? Colors.blue[800]:Colors.white,
+            color: isMe ? Colors.blue[800] : Colors.white,
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
               child: Text(
                 '$text',
-                style: TextStyle(fontSize: 15, color: isMe? Colors.white:Colors.black45),
+                style: TextStyle(
+                    fontSize: 15, color: isMe ? Colors.white : Colors.black45),
               ),
             ),
           ),
@@ -175,7 +184,7 @@ class MessageStreamBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: _firestore.collection('messages').snapshots(),
+      stream: _firestore.collection('messages').orderBy('time').snapshots(),
       builder: (context, snapshot) {
         List<MessageLine> messageWidgets = [];
 
@@ -186,7 +195,7 @@ class MessageStreamBuilder extends StatelessWidget {
             ),
           );
         }
-        final messages = snapshot.data!.docs;
+        final messages = snapshot.data!.docs.reversed;
         for (var message in messages) {
           final messageText = message.get('text');
           final messageSender = message.get('sender');
@@ -194,13 +203,15 @@ class MessageStreamBuilder extends StatelessWidget {
 
           final messageWidget = MessageLine(
             sender: messageSender,
-            text: messageText, isMe: currentUser == messageSender? true:false,
+            text: messageText,
+            isMe: currentUser == messageSender ? true : false,
           );
           messageWidgets.add(messageWidget);
         }
 
         return Expanded(
             child: ListView(
+              reverse: true,
                 padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
                 children: messageWidgets));
       },
